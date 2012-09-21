@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title><%= TITLE %></title>
+        <meta name="author" content="Anton Pirogov" />
+        <meta name="description" content="<%= TITLE %>" />
+        <link href="style.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <h1 id="title"><%= TITLE %></h1>
+        <h2 id="lastupd">Letztes Update <%= @lastupdate.strftime('am %d.%m.%Y um %H:%M') %></h2>
+        <div class="centered">
+            <table>
+                <tr><th>#</th><th>Name</th><th>Letzter Status</th><th>Punkte</th></tr>
+                <% @scores.each_with_index do |n,i| %>
+                    <tr><td><%= i+1 %></td><td><%= n['name'] %></td>
+                    <td>
+                        <% if !n['flags']['online'] %>Off: <span class="neg"><%= SC_OFFLINE %></span><% end %>
+                        <% if n['flags']['gateway'] %>Gw: <span class="pos">+<%= SC_GATEWAY %></span><% end %>
+                        <% if n['clients']>0 %>Client: <span class="pos">+<%= SC_PERCLIENT*n['clients'] %></span><% end %>
+                        <% unless n['meshs'].empty? %>Mesh: <span class="pos">+<%=n['meshs'].map{|e| SC_PERMESH / e}.inject(&:+).to_i %></span><% end %>
+                        <% unless n['vpns'].empty? %>Vpn: <span class="pos">+<%= n['vpns'].map{|e| SC_PERVPN / e}.inject(&:+).to_i %></span><% end %>
+                    </td>
+                    <td><%= n['points'] %></td></tr>
+                <% end %>
+            </table>
+        </div>
+    </body>
+</html>
