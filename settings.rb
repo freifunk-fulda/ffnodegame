@@ -8,6 +8,8 @@
 #Settings
 #--------
 
+#port for server
+PORT=1337
 #source of node data by ffmap-d3
 JSONSRC='http://burgtor.ffhl/mesh/nodes.json'
 #Title shown for page - change for other communities
@@ -25,4 +27,4 @@ SC_PERVPN=10 #divided by quality
 SC_PERMESH=50 #divided by quality
 
 #extra output
-DEBUG=false
+DEBUG=true

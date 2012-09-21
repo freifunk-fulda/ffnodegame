@@ -15,7 +15,7 @@ require './settings'
 require './generator'
 require './updater'
 
-set :port, 1337
+set :port, PORT
 
 #run updater thread in background on startup
 Updater.start
@@ -43,10 +43,22 @@ get '/status' do
   "Updater thread is#{Updater.running? ? ' ' : ' NOT '}running!"
 end
 
+#----
+
 get '/update' do
   if params['pw'] == PWD
     Generator.execute
     'Scores updated!'
+  else
+    'Wrong password!'
+  end
+end
+
+get '/reset' do
+  if params['pw'] == PWD
+    File.delete 'public/scores.json'
+    Generator.execute
+    'Scores reset!'
   else
     'Wrong password!'
   end
