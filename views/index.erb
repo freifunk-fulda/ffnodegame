@@ -9,7 +9,7 @@
     <body>
         <h1 id="title"><%= TITLE %></h1>
         <h2 id="lastupd">Letztes Update <%= @lastupdate.strftime('am %d.%m.%Y um %H:%M') %></h2>
-        <div class="centered">
+        <div>
             <table>
                 <tr><th>#</th><th>Name</th><th>Letzter Status</th><th>Punkte</th></tr>
                 <% @scores.each_with_index do |n,i| %>
@@ -18,12 +18,15 @@
                         <% if !n['flags']['online'] %>Off: <span class="neg"><%= SC_OFFLINE %></span><% end %>
                         <% if n['flags']['gateway'] %>Gw: <span class="pos">+<%= SC_GATEWAY %></span><% end %>
                         <% if n['clients']>0 %>Client: <span class="pos">+<%= SC_PERCLIENT*n['clients'] %></span><% end %>
-                        <% unless n['meshs'].empty? %>Mesh: <span class="pos">+<%=n['meshs'].map{|e| SC_PERMESH / e}.inject(&:+).to_i %></span><% end %>
-                        <% unless n['vpns'].empty? %>Vpn: <span class="pos">+<%= n['vpns'].map{|e| SC_PERVPN / e}.inject(&:+).to_i %></span><% end %>
+                        <% unless n['meshs'].empty? %>Mesh: <span class="pos">+<%= Generator.calc_mesh_points n %></span><% end %>
+                        <% unless n['vpns'].empty? %>Vpn: <span class="pos">+<%= Generator.calc_vpn_points n %></span><% end %>
                     </td>
                     <td><%= n['points'] %></td></tr>
                 <% end %>
             </table>
         </div>
+        <a class="footerlink" href="<%= GRAPHLINK %>">Knotengraph</a>
+        <span class="footerlink">© 2012 Anton Pirogov</span>
+        <a class="footerlink" href="http://github.com/apirogov/ffnodegame">ffnodegame source</a>
     </body>
 </html>

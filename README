@@ -6,18 +6,18 @@ Copyright (C) 2012 Anton Pirogov
 Licensed under the GPLv3
 
 requirements: ruby 1.9.3, sinatra gem
-run with: ruby nodegame.rb &
+run with: ruby ffnodegame.rb &
 
 look over settings.rb and change the password before launching!
 
 default settings:
 
-The Server loads the nodes.json data every 5 minutes and gives points to Freifunk nodes
+The server loads the nodes.json data every hour and gives points to Freifunk nodes
 
 gateway status: +100
 each currently connected client: +25
-each vpn link: +10 / quality
-each meshing link: +50 / quality
+each vpn link: +(10/quality)
+each meshing link: +(50/quality)
 node is offline: -100
 
 reset scores with: http://localhost:1337/reset?pw=<password>

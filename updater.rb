@@ -21,19 +21,15 @@ class Updater
         Generator.execute
         puts 'Scores updated!' if DEBUG
 
-        INTERVAL.times do
-          20.times do
-            sleep 5
-            print '.' if DEBUG
-            if Thread.current[:stop]
-              Thread.current[:running]=false
-              puts 'Stopped updater thread!'
-              Thread.exit
-            end
+        lasttime = Time.now
+        while (Time.now-lasttime) < INTERVAL*60
+          sleep 1
+          if Thread.current[:stop]
+            Thread.current[:running]=false
+            puts 'Stopped updater thread!'
+            Thread.exit
           end
-          puts if DEBUG
         end
-        puts if DEBUG
       end
     end
     return true #started

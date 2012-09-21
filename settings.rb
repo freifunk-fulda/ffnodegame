@@ -10,14 +10,17 @@
 
 #port for server
 PORT=1337
-#source of node data by ffmap-d3
-JSONSRC='http://burgtor.ffhl/mesh/nodes.json'
 #Title shown for page - change for other communities
 TITLE='Freifunk Lübeck Node Highscores'
+#source of node data by ffmap-d3
+JSONSRC='http://burgtor.ffhl/mesh/nodes.json'
+#link to ffmap-d3 map
+GRAPHLINK='http://burgtor.ffhl/mesh/nodes.html'
+
 #password to start/stop updater thread over GET requests
 PWD='hackme'
 #update interval in minutes
-INTERVAL=5
+INTERVAL=60
 
 #score values
 SC_OFFLINE=-100

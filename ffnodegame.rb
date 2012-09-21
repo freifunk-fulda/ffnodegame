@@ -4,7 +4,7 @@
 #Copyright (C) 2012 Anton Pirogov
 #Licensed under The GPLv3
 
-#TODO: eval bonus/malus points added by hand in bonus.json
+#TODO: eval bonus/penalty points added by hand in bonus.json
 #      add other automatic bonus points - eval some infos from mac address?
 
 require 'net/http'

@@ -32,7 +32,18 @@ class Generator
     update scores, snapshot
 
     scores.sort_by! {|s| s['points']}.reverse!
-    File.write "public/scores.json", JSON.generate(scores)
+
+    scorejson = JSON.generate scores
+    File.write "public/scores.json", scorejson
+    return scorejson
+  end
+
+  def self.calc_vpn_points(node)
+    node['vpns'].map{|e| SC_PERVPN / e}.inject(&:+).to_i
+  end
+
+  def self.calc_mesh_points(node)
+    node['meshs'].map{|e| SC_PERMESH / e}.inject(&:+).to_i
   end
 
   private
@@ -80,14 +91,15 @@ class Generator
     return routers
   end
 
-  #calculate points for current round
+  #calculate sum of points for node in current round
+  #NOTE: on calc changes, don't forget to check and update erb file
   def self.calc_points(node)
     points = 0
     points += SC_OFFLINE if !node['flags']['online']  #offline penalty
     points += SC_GATEWAY if node['flags']['gateway']
     points += SC_PERCLIENT * node['clients']
-    points += node['vpns'].map{|e| SC_PERVPN / e}.inject(&:+).to_i
-    points += node['meshs'].map{|e| SC_PERMESH / e}.inject(&:+).to_i
+    points += calc_vpn_points node
+    points += calc_mesh_points node
     return points
   end
 
@@ -98,7 +110,7 @@ class Generator
       if i.nil? #new entry
         scores.push n
         scores[-1]['points'] = calc_points n
-      elsif #update preserving points and bonus info
+      elsif #update preserving points
         p = scores[i]['points']
         scores[i] = n
         scores[i]['points'] = p + calc_points(n)
