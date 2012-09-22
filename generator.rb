@@ -4,6 +4,7 @@
 #Licensed under The GPLv3
 
 require 'json'
+require 'net/http'
 
 require './settings'
 
@@ -27,6 +28,7 @@ class Generator
       return nil
     end
 
+    #NOTE: filtering and analyzing of JSON data fits perfectly here
     data = JSON.parse jsonstr
     snapshot = transform data
     update scores, snapshot
@@ -50,8 +52,8 @@ class Generator
 
   #clean and prepare node data
   def self.transform(nodejson)
-    nodes = nodejson['nodes'].dup
-    links = nodejson['links'].dup
+    nodes = nodejson['nodes']
+    links = nodejson['links']
 
     nodes.each do |n|
       n['meshs']=[]
@@ -105,8 +107,20 @@ class Generator
 
   #update scores, add new nodes, remove old nodes with <=0 points
   def self.update(scores, data)
+    #detect nodes which are gone from source data (by name so node renames affected too)
+    #and let them slowly die (by offline penalty)
+    scores.select{|s| !data.index{|d| d['name']==s['name']}}.each do |s|
+      s['flags']['online']=false
+      s['flags']['gateway']=false
+      s['vpns'] = []
+      s['meshs'] = []
+      s['clients'] = 0
+      s['points'] += calc_points s
+    end
+
+    #perform regular update
     data.each do |n|
-      i = scores.index{|s| s['id'] == n['id'] }
+      i = scores.index{|s| s['name'] == n['name'] }
       if i.nil? #new entry
         scores.push n
         scores[-1]['points'] = calc_points n

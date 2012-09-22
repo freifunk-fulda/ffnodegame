@@ -7,7 +7,6 @@
 #TODO: eval bonus/penalty points added by hand in bonus.json
 #      add other automatic bonus points - eval some infos from mac address?
 
-require 'net/http'
 require 'json'
 require 'sinatra'
 
