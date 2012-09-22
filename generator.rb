@@ -23,8 +23,8 @@ class Generator
     begin
       jsonstr = Net::HTTP.get(URI(JSONSRC))
     rescue
-      puts 'Failed loading node data! Retrying next round!'
-      return
+      #failed!
+      return nil
     end
 
     data = JSON.parse jsonstr

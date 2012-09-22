@@ -17,11 +17,18 @@ class Updater
       Thread.current[:running] = true
       puts 'Started updater thread!'
       loop do
+        lasttime = Time.now
         puts 'Perform score update...' if DEBUG
-        Generator.execute
+        result = nil
+        while result.nil?
+          result = Generator.execute
+          if result.nil?
+            puts 'Failed loading node data! Retrying in 60 seconds...'
+            sleep 60
+          end
+        end
         puts 'Scores updated!' if DEBUG
 
-        lasttime = Time.now
         while (Time.now-lasttime) < INTERVAL*60
           sleep 1
           if Thread.current[:stop]
