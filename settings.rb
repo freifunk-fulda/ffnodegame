@@ -29,5 +29,9 @@ SC_PERCLIENT=25
 SC_PERVPN=10 #divided by quality
 SC_PERMESH=50 #divided by quality
 
+#fun option - penalty for Apple devices connected
+PUNISHAPPLE=true
+SC_PERAPPLE=-15
+
 #extra output
 DEBUG=true

@@ -18,6 +18,7 @@
                         <% if !n['flags']['online'] %>Off: <span class="neg"><%= SC_OFFLINE %></span><% end %>
                         <% if n['flags']['gateway'] %>Gw: <span class="pos">+<%= SC_GATEWAY %></span><% end %>
                         <% if n['clients']>0 %>Client: <span class="pos">+<%= SC_PERCLIENT*n['clients'] %></span><% end %>
+                        <% if n['apples']>0 && PUNISHAPPLE %>Apple: <span class="neg"><%= SC_PERAPPLE*n['apples'] %></span><% end %>
                         <% unless n['meshs'].empty? %>Mesh: <span class="pos">+<%= Generator.calc_mesh_points n %></span><% end %>
                         <% unless n['vpns'].empty? %>Vpn: <span class="pos">+<%= Generator.calc_vpn_points n %></span><% end %>
                     </td>

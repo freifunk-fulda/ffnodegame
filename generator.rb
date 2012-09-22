@@ -9,6 +9,14 @@ require 'net/http'
 require './settings'
 
 class Generator
+
+  #load apple MAC adresses once
+  if PUNISHAPPLE
+    #NOTE: update the applemacs.txt file with:
+    #./queryvendormac.sh apple > applemacs.txt
+    @@apples = File.readlines('applemacs.txt').map{|l| l.chomp.strip.downcase}
+  end
+
   #run one update cycle and generate scores.json
   def self.execute
     #load current scores or fall back to empty array
@@ -37,7 +45,7 @@ class Generator
 
     scorejson = JSON.generate scores
     File.write "public/scores.json", scorejson
-    return scorejson
+    return scores
   end
 
   def self.calc_vpn_points(node)
@@ -59,6 +67,7 @@ class Generator
       n['meshs']=[]
       n['vpns']=[]
       n['clients']=0
+      n['apples']=0
     end
 
     links.each do |l|
@@ -77,20 +86,34 @@ class Generator
       elsif t=='client'
         nodes[src]['clients'] += 1
         nodes[dst]['clients'] += 1
+
+        if PUNISHAPPLE
+          if is_apple(nodes[src]) || is_apple(nodes[dst])
+            nodes[src]['apples'] += 1
+            nodes[dst]['apples'] += 1
+          end
+        end
       end
     end
 
     #remove clients
     routers = nodes.select{|n| n['flags']['client'] == false}
 
-    #remove unneccesary stuff
+    #remove unneccesary stuff from router score json
     routers.each do |r|
       r['flags'].delete 'client' #no clients in array anyway
       r['flags'].delete 'vpn' #not used
       r.delete 'geo'  #not interesting
       r.delete 'macs' #not interesting
+      r.delete 'id' #not interesting
     end
+
     return routers
+  end
+
+  #decide by MAC address
+  def self.is_apple(node)
+    return @@apples.index{|a| a==node['id'][0..7]}
   end
 
   #calculate sum of points for node in current round
@@ -100,6 +123,7 @@ class Generator
     points += SC_OFFLINE if !node['flags']['online']  #offline penalty
     points += SC_GATEWAY if node['flags']['gateway']
     points += SC_PERCLIENT * node['clients']
+    points += SC_PERAPPLE * node['apples'] if PUNISHAPPLE
     points += calc_vpn_points node
     points += calc_mesh_points node
     return points
@@ -115,6 +139,7 @@ class Generator
       s['vpns'] = []
       s['meshs'] = []
       s['clients'] = 0
+      s['apples'] = 0
       s['points'] += calc_points s
     end
 
