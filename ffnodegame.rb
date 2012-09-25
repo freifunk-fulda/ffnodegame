@@ -4,8 +4,10 @@
 #Copyright (C) 2012 Anton Pirogov
 #Licensed under The GPLv3
 
-#TODO: eval bonus/penalty points added by hand in bonus.json
+#TODO: eval bonus/penalty points added by hand in bonus.json?
 #      add other automatic bonus points - eval some infos from mac address?
+#      value redundant meshing links less (or root function-style?)
+#      create daily/weekly/monthly/overall stats -> daily archive + "reset"
 
 require 'json'
 require 'sinatra'
@@ -66,10 +68,11 @@ end
 get '/' do
   begin
     @lastupdate = File.mtime 'public/scores.json'
-    @scores = JSON.parse File.readlines('public/scores.json').join
+    file = File.open('public/scores.json','r:UTF-8')  #because passenger sucks
+    @scores = JSON.parse file.read
     erb :index
   rescue
-    "Error: no scores.json file found!"
+    "An error occured, probably no scores.json file found!"
   end
 end
 

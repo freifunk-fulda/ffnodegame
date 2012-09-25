@@ -22,7 +22,8 @@ class Generator
     #load current scores or fall back to empty array
     scores = nil
     begin
-      scores = JSON.parse File.readlines("public/scores.json").join
+      file = File.open('public/scores.json','r:UTF-8') #because passenger sucks
+      scores = JSON.parse file.read
     rescue
       scores = []
     end
