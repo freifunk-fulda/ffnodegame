@@ -8,8 +8,6 @@
 #Settings
 #--------
 
-#port for server
-PORT=1337
 #Title shown for page - change for other communities
 TITLE='Freifunk Lübeck Node Highscores'
 #source of node data by ffmap-d3
@@ -36,5 +34,3 @@ SC_PERAPPLE=-15
 #hide following nodes from scores
 BLACKLIST=['burgtor','holstentor','muehlentor']
 
-#extra output
-DEBUG=true

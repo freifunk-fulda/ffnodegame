@@ -25,11 +25,11 @@ class Generator
   end
 
   #take score file and generate a sorted highscore list for last N days
-  def self.generate(days)
+  def self.generate(days=1, offset=0)
     scores = read_scores
 
     #sum up last N day points
-    scores.each{|e| e['points'] = e['points'][0..(days-1)].inject(&:+)}
+    scores.each{|e| e['points'] = e['points'][offset,days].to_a.inject(&:+).to_i}
     #sort by score
     scores.sort_by! {|e| e['points']}.reverse!
 

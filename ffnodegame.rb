@@ -7,7 +7,6 @@
 #TODO: eval bonus/penalty points added by hand in bonus.json?
 #      add other automatic bonus points - eval some infos from mac address?
 #      value redundant meshing links less (or root function-style?)
-#      create daily/weekly/monthly/overall stats -> daily archive + "reset"
 
 require 'json'
 require 'sinatra'
@@ -15,8 +14,6 @@ require 'sinatra'
 require './settings'
 require './generator'
 require './updater'
-
-set :port, PORT
 
 #run updater thread in background on startup
 Updater.start
@@ -69,8 +66,11 @@ get '/' do
   begin
     @days = params.include?('days') ? params['days'].to_i : 1
     @days = 1 if @days <= 0
+    @offset = params.include?('offset') ? params['offset'].to_i : 0
+    @offset = 0 if @offset < 0
+
     @lastupdate = Generator.last_update
-    @scores = Generator.generate @days
+    @scores = Generator.generate @days, @offset
 
     erb :index
   rescue
@@ -78,3 +78,15 @@ get '/' do
   end
 end
 
+helpers do
+  def scores_for(days, offset)
+    if days == 1
+      return 'heute' if offset == 0
+      return 'gestern' if offset == 1
+      return 'vorgestern' if offset == 2
+    end
+    return 'letzte Woche' if offset == 7 && days == 7
+    return "#{days} Tage" if offset == 0
+    return "(benutzerdefiniert)"
+  end
+end

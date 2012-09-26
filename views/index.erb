@@ -8,12 +8,18 @@
     </head>
     <body>
         <h1 id="title"><%= TITLE %></h1>
-        <h2 id="lastndays">für <%= @days>1 ? "#{@days} Tage" : "heute" %></h2>
+        <h2 id="lastndays">für <%= scores_for @days, @offset %></h2>
+        <div>
         <span>Anzeigen für:</span>
-        <a class="link" href="<%= url('/') %>">heute</a>
         <a class="link" href="<%= url('/?days=7') %>">7 Tage</a>
         <a class="link" href="<%= url('/?days=14') %>">14 Tage</a>
         <a class="link" href="<%= url('/?days=30') %>">30 Tage</a>
+        </div><div style="margin: 5px;">
+        <a class="link" href="<%= url('/') %>">heute</a>
+        <a class="link" href="<%= url('/?offset=1') %>">gestern</a>
+        <a class="link" href="<%= url('/?offset=2') %>">vorgestern</a>
+        <a class="link" href="<%= url('/?days=7&offset=7') %>">letzte Woche</a>
+        </div>
 
         <h2 id="lastupd">Letztes Update <%= @lastupdate.strftime('am %d.%m.%Y um %H:%M') %></h2>
         <div>
