@@ -15,6 +15,8 @@ require './settings'
 require './generator'
 require './updater'
 
+log "---- APPLICATION STARTING ----"
+
 #run updater thread in background on startup
 Updater.start
 
@@ -64,6 +66,8 @@ end
 
 get '/' do
   begin
+    log 'Viewed by: '+request.ip
+
     @days = params.include?('days') ? params['days'].to_i : 1
     @days = 1 if @days <= 0
     @offset = params.include?('offset') ? params['offset'].to_i : 0

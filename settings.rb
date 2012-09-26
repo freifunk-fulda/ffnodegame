@@ -34,3 +34,5 @@ SC_PERAPPLE=-15
 #hide following nodes from scores
 BLACKLIST=['burgtor','holstentor','muehlentor']
 
+#enable logging
+LOG=true

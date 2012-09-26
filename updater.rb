@@ -15,25 +15,25 @@ class Updater
     @@updater = Thread.new do
       Thread.current[:stop] = false
       Thread.current[:running] = true
-      puts 'Started updater thread!'
+      log 'Started updater thread!'
       loop do
         lasttime = Time.now
-        puts 'Perform score update...' if DEBUG
+        log 'Start score update...'
         result = nil
         while result.nil?
           result = Generator.execute
           if result.nil?
-            puts 'Failed loading node data! Retrying in 60 seconds...'
+            log 'Failed loading node data! Retrying in 60 seconds...'
             sleep 60
           end
         end
-        puts 'Scores updated!' if DEBUG
+        log 'Scores updated!'
 
         while (Time.now-lasttime) < INTERVAL*60
           sleep 1
           if Thread.current[:stop]
             Thread.current[:running]=false
-            puts 'Stopped updater thread!'
+            log 'Stopped updater thread!'
             Thread.exit
           end
         end
