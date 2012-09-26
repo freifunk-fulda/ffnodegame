@@ -67,12 +67,14 @@ end
 
 get '/' do
   begin
-    @lastupdate = File.mtime 'public/scores.json'
-    file = File.open('public/scores.json','r:UTF-8')  #because passenger sucks
-    @scores = JSON.parse file.read
+    @days = params.include?('days') ? params['days'].to_i : 1
+    @days = 1 if @days <= 0
+    @lastupdate = Generator.last_update
+    @scores = Generator.generate @days
+
     erb :index
   rescue
-    "An error occured, probably no scores.json file found!"
+    "An error occured, no scores.json file found or invalid parameter value!"
   end
 end
 

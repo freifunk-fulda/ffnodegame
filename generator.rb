@@ -17,32 +17,41 @@ class Generator
     @@apples = File.readlines('applemacs.txt').map{|l| l.chomp.strip.downcase}
   end
 
-  #run one update cycle and generate scores.json
+  #return last update time -> last modification to file
+  def self.last_update
+    return File.mtime 'public/scores.json'
+  rescue
+    return Time.new(0)
+  end
+
+  #take score file and generate a sorted highscore list for last N days
+  def self.generate(days)
+    scores = read_scores
+
+    #sum up last N day points
+    scores.each{|e| e['points'] = e['points'][0..(days-1)].inject(&:+)}
+    #sort by score
+    scores.sort_by! {|e| e['points']}.reverse!
+
+    return scores
+  end
+
+  #run one update cycle and generate/update scores.json
   def self.execute
-    #load current scores or fall back to empty array
-    scores = nil
-    begin
-      file = File.open('public/scores.json','r:UTF-8') #because passenger sucks
-      scores = JSON.parse file.read
-    rescue
-      scores = []
-    end
+    scores = read_scores
 
     #load node data
     jsonstr = nil
     begin
       jsonstr = Net::HTTP.get(URI(JSONSRC))
     rescue
-      #failed!
-      return nil
+      return nil #failed!
     end
 
     #NOTE: filtering and analyzing of JSON data fits perfectly here
     data = JSON.parse jsonstr
     snapshot = transform data
     update scores, snapshot
-
-    scores.sort_by! {|s| s['points']}.reverse!
 
     scorejson = JSON.generate scores
     File.write "public/scores.json", scorejson
@@ -58,6 +67,26 @@ class Generator
   end
 
   private
+
+  #load current score file or fall back to empty array
+  def self.read_scores
+    scores = nil
+    begin
+      file = File.open('public/scores.json','r:UTF-8') #because passenger sucks
+      scores = JSON.parse file.read
+    rescue
+      scores = []
+    end
+    return scores
+  end
+
+  #insert fresh new day points entry
+  def self.rotate(scores)
+    scores.each do |e|
+      e['points'].unshift 0
+      e['points'].pop if e['points'].length > 30
+    end
+  end
 
   #clean and prepare node data
   def self.transform(nodejson)
@@ -130,8 +159,20 @@ class Generator
     return points
   end
 
+  #check whether a node shall be garbage collected
+  #-> total sum of points <= 0 OR today way offline for 12 hours
+  def self.is_loser?(node)
+    sum = node['points'].inject(&:+).to_i
+    return true if sum <= 0
+    return node['points'][0]<=SC_OFFLINE*12
+  end
+
   #update scores, add new nodes, remove old nodes with <=0 points
   def self.update(scores, data)
+    #start new day points field on day change between updates
+    rotate scores if last_update.day < Time.now.day
+
+    #garbage collection:
     #detect nodes which are gone from source data (by name so node renames affected too)
     #and let them slowly die (by offline penalty)
     scores.select{|s| !data.index{|d| d['name']==s['name']}}.each do |s|
@@ -141,7 +182,7 @@ class Generator
       s['meshs'] = []
       s['clients'] = 0
       s['apples'] = 0
-      s['points'] += calc_points s
+      s['points'][0] += calc_points s
     end
 
     #perform regular update
@@ -149,17 +190,19 @@ class Generator
       i = scores.index{|s| s['name'] == n['name'] }
       if i.nil? #new entry
         scores.push n
-        scores[-1]['points'] = calc_points n
-      elsif #update preserving points
+        scores[-1]['points'] = [calc_points(n)]
+      elsif #update preserving points array
         p = scores[i]['points']
         scores[i] = n
-        scores[i]['points'] = p + calc_points(n)
+        scores[i]['points'] = p
+        scores[i]['points'][0] += calc_points n
       end
     end
 
-    #return without losers and nameless routers
-    scores.delete_if{|s| s['points']<=0}
-    scores.delete_if{|s| s['name']==''}
+    #return without nameless routers, blacklisted and losers
+    scores.delete_if{|s| s['name'].empty?}
+    scores.delete_if{|s| BLACKLIST.index s['name']}
+    scores.delete_if{|s| is_loser? s}
     return scores
   end
 end

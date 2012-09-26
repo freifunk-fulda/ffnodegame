@@ -5,6 +5,12 @@ body {
 
 #title {
   font-size: 32px;
+  margin-bottom: 0px;
+}
+
+#lastndays {
+  font-size: 24px;
+  margin-top: 0px;
 }
 
 #lastupd {
@@ -16,11 +22,15 @@ a:visited {color:black; text-decoration:none}
 a:active {color:black; text-decoration:underline}
 a:hover {color:blue; text-decoration:none}
 
-.footerlink {
+.link {
   border-style: dashed;
   border-width: 1px;
   border-color: gray;
   border-radius: 5px;
+  padding: 1px;
+}
+
+.footer {
   margin-top: 10px;
   font-size: 12px;
 }

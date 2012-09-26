@@ -33,5 +33,8 @@ SC_PERMESH=50 #divided by quality
 PUNISHAPPLE=true
 SC_PERAPPLE=-15
 
+#hide following nodes from scores
+BLACKLIST=['burgtor','holstentor','muehlentor']
+
 #extra output
 DEBUG=true

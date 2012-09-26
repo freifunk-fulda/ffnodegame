@@ -8,6 +8,13 @@
     </head>
     <body>
         <h1 id="title"><%= TITLE %></h1>
+        <h2 id="lastndays">für <%= @days>1 ? "#{@days} Tage" : "heute" %></h2>
+        <span>Anzeigen für:</span>
+        <a class="link" href="<%= url('/') %>">heute</a>
+        <a class="link" href="<%= url('/?days=7') %>">7 Tage</a>
+        <a class="link" href="<%= url('/?days=14') %>">14 Tage</a>
+        <a class="link" href="<%= url('/?days=30') %>">30 Tage</a>
+
         <h2 id="lastupd">Letztes Update <%= @lastupdate.strftime('am %d.%m.%Y um %H:%M') %></h2>
         <div>
             <table>
@@ -26,8 +33,8 @@
                 <% end %>
             </table>
         </div>
-        <a class="footerlink" href="<%= GRAPHLINK %>">Knotengraph</a>
-        <span class="footerlink">© 2012 Anton Pirogov</span>
-        <a class="footerlink" href="http://github.com/apirogov/ffnodegame">ffnodegame source</a>
+        <a class="footer link" href="<%= GRAPHLINK %>">Knotengraph</a>
+        <span class="footer link">© 2012 Anton Pirogov</span>
+        <a class="footer link" href="http://github.com/apirogov/ffnodegame">ffnodegame source</a>
     </body>
 </html>
