@@ -9,6 +9,19 @@ require './settings'
 class Updater
   @@updater = nil
 
+  def self.update
+    log 'Start score update...'
+    result = nil
+    while result.nil?
+      result = Generator.execute
+      if result.nil?
+        log 'Failed loading node data! Retrying in 60 seconds...'
+        sleep 60
+      end
+    end
+    log 'Scores updated!'
+  end
+
   def self.start
     return false if self.running?  #already running
 
@@ -18,17 +31,7 @@ class Updater
       log 'Started updater thread!'
       loop do
         lasttime = Time.now
-        log 'Start score update...'
-        result = nil
-        while result.nil?
-          result = Generator.execute
-          if result.nil?
-            log 'Failed loading node data! Retrying in 60 seconds...'
-            sleep 60
-          end
-        end
-        log 'Scores updated!'
-
+        update
         while (Time.now-lasttime) < INTERVAL*60
           sleep 1
           if Thread.current[:stop]

@@ -4,9 +4,7 @@
 #Copyright (C) 2012 Anton Pirogov
 #Licensed under The GPLv3
 
-#TODO: eval bonus/penalty points added by hand in bonus.json?
-#      add other automatic bonus points - eval some infos from mac address?
-#      value redundant meshing links less (or root function-style?)
+#TODO: value redundant meshing links less (or root function-style?)
 
 require 'json'
 require 'sinatra'
@@ -18,7 +16,7 @@ require './updater'
 log "---- APPLICATION STARTING ----"
 
 #run updater thread in background on startup
-Updater.start
+Updater.start if STARTUPDATER
 
 #sinatra routes
 get '/start' do

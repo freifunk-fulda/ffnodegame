@@ -17,8 +17,6 @@ GRAPHLINK='http://burgtor.ffhl/mesh/nodes.html'
 
 #password to start/stop updater thread over GET requests
 PWD='hackme'
-#update interval in minutes
-INTERVAL=60
 
 #score values
 SC_OFFLINE=-100
@@ -36,3 +34,8 @@ BLACKLIST=['burgtor','holstentor','muehlentor']
 
 #enable logging
 LOG=true
+
+#start updater thread from sinatra (does not work when integrated with passenger)
+STARTUPDATER=false
+#update interval in minutes when using builtin update thread
+INTERVAL=60
