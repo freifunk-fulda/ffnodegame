@@ -18,7 +18,6 @@ require './updater'
 #some constants
 TITLE = "Freifunk Lübeck Node Highscores"
 GRAPHLINK='http://burgtor.ffhl/mesh/nodes.html'
-JSONSRC='http://burgtor.ffhl/mesh/nodes.json'
 
 log "---- APPLICATION STARTING ----"
 

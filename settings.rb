@@ -7,6 +7,10 @@
 #--------
 #Settings
 #--------
+#
+
+#source path of node data
+JSONSRC='http://burgtor.ffhl/mesh/nodes.json'
 
 #password for commands over GET requests
 PWD='hackme'

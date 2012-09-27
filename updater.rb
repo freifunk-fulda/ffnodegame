@@ -11,10 +11,10 @@ class Updater
 
   def self.update
     log 'Start score update...'
-    result = nil
-    while result.nil?
+    result = false
+    while !result
       result = Scores.update
-      if result.nil?
+      if !result
         log 'Failed loading node data! Retrying in 60 seconds...'
         sleep 60
       end
