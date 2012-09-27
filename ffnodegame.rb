@@ -5,20 +5,28 @@
 #Licensed under The GPLv3
 
 #TODO: value redundant meshing links less (or root function-style?)
+#     -> find a way to seperate nameless/ derive ID?...
+#     -> what to save and what to filter?
 
 require 'json'
 require 'sinatra'
 
 require './settings'
-require './generator'
+require './scores'
 require './updater'
+
+#some constants
+TITLE = "Freifunk Lübeck Node Highscores"
+GRAPHLINK='http://burgtor.ffhl/mesh/nodes.html'
+JSONSRC='http://burgtor.ffhl/mesh/nodes.json'
 
 log "---- APPLICATION STARTING ----"
 
-#run updater thread in background on startup
-Updater.start if STARTUPDATER
+if STARTUPDATER
 
-#sinatra routes
+Updater.start
+
+#admin/debug routes
 get '/start' do
   if params['pw'] == PWD
     val = Updater.start
@@ -41,11 +49,11 @@ get '/status' do
   "Updater thread is#{Updater.running? ? ' ' : ' NOT '}running!"
 end
 
-#----
+end #updater control routes
 
 get '/update' do
   if params['pw'] == PWD
-    Generator.execute
+    Scores.update
     'Scores updated!'
   else
     'Wrong password!'
@@ -55,29 +63,26 @@ end
 get '/reset' do
   if params['pw'] == PWD
     File.delete 'public/scores.json'
-    Generator.execute
+    Scores.update
     'Scores reset!'
   else
     'Wrong password!'
   end
 end
 
+#----
 get '/' do
-  begin
-    log 'Viewed by: '+request.ip
+  log 'Viewed by '+request.ip
 
-    @days = params.include?('days') ? params['days'].to_i : 1
-    @days = 1 if @days <= 0
-    @offset = params.include?('offset') ? params['offset'].to_i : 0
-    @offset = 0 if @offset < 0
+  @days = params.include?('days') ? params['days'].to_i : 1
+  @days = 1 if @days <= 0
+  @offset = params.include?('offset') ? params['offset'].to_i : 0
+  @offset = 0 if @offset < 0
 
-    @lastupdate = Generator.last_update
-    @scores = Generator.generate @days, @offset
+  @lastupdate = Scores.last_update.strftime('am %d.%m.%Y um %H:%M')
+  @scores = Scores.generate @days, @offset
 
-    erb :index
-  rescue
-    "An error occured, no scores.json file found or invalid parameter value!"
-  end
+  erb :index
 end
 
 helpers do

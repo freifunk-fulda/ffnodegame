@@ -3,7 +3,7 @@
 #Copyright (C) 2012 Anton Pirogov
 #Licensed under The GPLv3
 
-require './generator'
+require './scores'
 require './settings'
 
 class Updater
@@ -13,7 +13,7 @@ class Updater
     log 'Start score update...'
     result = nil
     while result.nil?
-      result = Generator.execute
+      result = Scores.update
       if result.nil?
         log 'Failed loading node data! Retrying in 60 seconds...'
         sleep 60
@@ -23,7 +23,7 @@ class Updater
   end
 
   def self.start
-    return false if self.running?  #already running
+    return false if self.running?
 
     @@updater = Thread.new do
       Thread.current[:stop] = false
@@ -42,7 +42,7 @@ class Updater
         end
       end
     end
-    return true #started
+    return true
   end
 
   def self.stop

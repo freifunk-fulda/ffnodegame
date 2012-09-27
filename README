@@ -6,7 +6,7 @@ Copyright (C) 2012 Anton Pirogov
 Licensed under the GPLv3
 
 requirements: ruby 1.9.3, sinatra gem
-run with: ruby ffnodegame.rb &
+run with: ruby ffnodegame.rb
 
 look over settings.rb and change the password before launching!
 
@@ -20,5 +20,5 @@ each vpn link: +(10/quality)
 each meshing link: +(50/quality)
 node is offline: -100
 
-reset scores with: http://localhost:1337/reset?pw=<password>
-force update with: http://localhost:1337/update?pw=<password>
+reset scores with: http://localhost:port/reset?pw=<password>
+force update with: http://localhost:port/update?pw=<password>

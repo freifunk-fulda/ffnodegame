@@ -13,7 +13,9 @@ def log(txt)
   `echo "#{Time.now.to_s}: #{txt}" >> log.txt` if LOG
 end
 
-class Generator
+class Scores
+
+  @@scorepath = 'public/scores.json'
 
   #load apple MAC adresses once
   if PUNISHAPPLE
@@ -22,27 +24,35 @@ class Generator
     @@apples = File.readlines('applemacs.txt').map{|l| l.chomp.strip.downcase}
   end
 
+  #--------
+
   #return last update time -> last modification to file
   def self.last_update
-    return File.mtime 'public/scores.json'
+    return File.mtime @@scorepath
   rescue
     return Time.new(0)
   end
 
-  #take score file and generate a sorted highscore list for last N days
+  #take score file and generate a sorted highscore list of requested span for output
   def self.generate(days=1, offset=0)
     scores = read_scores
 
-    #sum up last N day points
+    #sum up requested day scores
     scores.each{|e| e['points'] = e['points'][offset,days].to_a.inject(&:+).to_i}
+
+    #return without nameless routers, blacklisted and losers
+    scores.delete_if{|e| BLACKLIST.index e['name']}
+    scores.delete_if{|e| e['name'].empty?}
+    scores.delete_if{|e| e['points']<=0}
+
     #sort by score
     scores.sort_by! {|e| e['points']}.reverse!
 
     return scores
   end
 
-  #run one update cycle and generate/update scores.json
-  def self.execute
+  #run one update cycle and generate/update the score file
+  def self.update
     scores = read_scores
 
     #load node data
@@ -50,25 +60,17 @@ class Generator
     begin
       jsonstr = Net::HTTP.get(URI(JSONSRC))
     rescue
-      return nil #failed!
+      return false #failed!
     end
 
     #NOTE: filtering and analyzing of JSON data fits perfectly here
     data = JSON.parse jsonstr
     snapshot = transform data
-    update scores, snapshot
+    merge scores, snapshot
 
     scorejson = JSON.generate scores
-    File.write "public/scores.json", scorejson
-    return scores
-  end
-
-  def self.calc_vpn_points(node)
-    node['vpns'].map{|e| SC_PERVPN / e}.inject(&:+).to_i
-  end
-
-  def self.calc_mesh_points(node)
-    node['meshs'].map{|e| SC_PERMESH / e}.inject(&:+).to_i
+    File.write @@scorepath, scorejson
+    return true
   end
 
   private
@@ -76,21 +78,24 @@ class Generator
   #load current score file or fall back to empty array
   def self.read_scores
     scores = nil
-    begin
-      file = File.open('public/scores.json','r:UTF-8') #because passenger sucks
-      scores = JSON.parse file.read
-    rescue
-      scores = []
-    end
+    file = File.open @@scorepath,'r:UTF-8'  #because passenger sucks
+    scores = JSON.parse file.read
     return scores
+  rescue
+    return []
   end
 
-  #insert fresh new day points entry
+  #insert fresh new day score entry
   def self.rotate(scores)
     scores.each do |e|
       e['points'].unshift 0
       e['points'].pop if e['points'].length > 30
     end
+  end
+  #
+  #decide by MAC address
+  def self.is_apple?(node)
+    return @@apples.index{|a| a==node['id'][0..7]}
   end
 
   #clean and prepare node data
@@ -123,7 +128,7 @@ class Generator
         nodes[dst]['clients'] += 1
 
         if PUNISHAPPLE
-          if is_apple(nodes[src]) || is_apple(nodes[dst])
+          if is_apple?(nodes[src]) || is_apple?(nodes[dst])
             nodes[src]['apples'] += 1
             nodes[dst]['apples'] += 1
           end
@@ -146,34 +151,30 @@ class Generator
     return routers
   end
 
-  #decide by MAC address
-  def self.is_apple(node)
-    return @@apples.index{|a| a==node['id'][0..7]}
-  end
-
-  #calculate sum of points for node in current round
-  #NOTE: on calc changes, don't forget to check and update erb file
+  #calculate and add points for node in current round and set info for html
   def self.calc_points(node)
-    points = 0
-    points += SC_OFFLINE if !node['flags']['online']  #offline penalty
-    points += SC_GATEWAY if node['flags']['gateway']
-    points += SC_PERCLIENT * node['clients']
-    points += SC_PERAPPLE * node['apples'] if PUNISHAPPLE
-    points += calc_vpn_points node
-    points += calc_mesh_points node
-    return points
-  end
+    #reset current status data
+    node['sc_offline'] = node['sc_gateway'] = node['sc_clients'] = 0
+    node['sc_apples'] = node['sc_vpns'] = node['sc_meshs'] = 0
+    node['points'] = [0] if node['points'].nil?
+    p = node['points']
 
-  #check whether a node shall be garbage collected
-  #-> total sum of points <= 0 OR today way offline for 12 hours
-  def self.is_loser?(node)
-    sum = node['points'].inject(&:+).to_i
-    return true if sum <= 0
-    return node['points'][0]<=SC_OFFLINE*12
+    if !node['flags']['online']  #offline penalty
+      p[0] += (node['sc_offline'] = SC_OFFLINE)
+      return
+    end
+
+    p[0] += ( node['sc_gateway'] = SC_GATEWAY ) if node['flags']['gateway']
+
+    p[0] += ( node['sc_clients'] = SC_PERCLIENT * node['clients'] )
+    p[0] += ( node['sc_apples'] = SC_PERAPPLE * node['apples'] ) if PUNISHAPPLE
+
+    p[0] += ( node['sc_vpns'] = node['vpns'].map{|e| SC_PERVPN / e}.inject(&:+).to_i )
+    p[0] += ( node['sc_meshs'] = node['meshs'].map{|e| SC_PERMESH / e}.inject(&:+).to_i )
   end
 
   #update scores, add new nodes, remove old nodes with <=0 points
-  def self.update(scores, data)
+  def self.merge(scores, data)
     #start new day points field on day change between updates
     rotate scores if last_update.day < Time.now.day
 
@@ -187,7 +188,7 @@ class Generator
       s['meshs'] = []
       s['clients'] = 0
       s['apples'] = 0
-      s['points'][0] += calc_points s
+      calc_points s
     end
 
     #perform regular update
@@ -195,19 +196,15 @@ class Generator
       i = scores.index{|s| s['name'] == n['name'] }
       if i.nil? #new entry
         scores.push n
-        scores[-1]['points'] = [calc_points(n)]
+        calc_points scores[-1]
       elsif #update preserving points array
         p = scores[i]['points']
         scores[i] = n
         scores[i]['points'] = p
-        scores[i]['points'][0] += calc_points n
+        calc_points scores[i]
       end
     end
 
-    #return without nameless routers, blacklisted and losers
-    scores.delete_if{|s| s['name'].empty?}
-    scores.delete_if{|s| BLACKLIST.index s['name']}
-    scores.delete_if{|s| is_loser? s}
     return scores
   end
 end

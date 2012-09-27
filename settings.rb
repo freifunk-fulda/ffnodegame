@@ -8,14 +8,7 @@
 #Settings
 #--------
 
-#Title shown for page - change for other communities
-TITLE='Freifunk Lübeck Node Highscores'
-#source of node data by ffmap-d3
-JSONSRC='http://burgtor.ffhl/mesh/nodes.json'
-#link to ffmap-d3 map
-GRAPHLINK='http://burgtor.ffhl/mesh/nodes.html'
-
-#password to start/stop updater thread over GET requests
+#password for commands over GET requests
 PWD='hackme'
 
 #score values
@@ -29,13 +22,19 @@ SC_PERMESH=50 #divided by quality
 PUNISHAPPLE=true
 SC_PERAPPLE=-15
 
+#----
+
 #hide following nodes from scores
 BLACKLIST=['burgtor','holstentor','muehlentor']
 
-#enable logging
-LOG=true
+#----
 
 #start updater thread from sinatra (does not work when integrated with passenger)
 STARTUPDATER=false
 #update interval in minutes when using builtin update thread
 INTERVAL=60
+
+#----
+
+#enable logging
+LOG=true
