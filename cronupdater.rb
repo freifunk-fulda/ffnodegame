@@ -7,7 +7,11 @@ log 'Start score update...'
 result = false
 failed = 0
 while !result
-  result = Scores.update
+  begin
+    result = Scores.update
+  rescue
+    result = false
+  end
   if !result && failed < 10
     failed += 1
     log 'Failed loading node data! Retrying in 60 seconds...'
