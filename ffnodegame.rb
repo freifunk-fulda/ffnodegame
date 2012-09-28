@@ -4,9 +4,7 @@
 #Copyright (C) 2012 Anton Pirogov
 #Licensed under The GPLv3
 
-#TODO: value redundant meshing links less (or root function-style?)
-#     -> find a way to seperate nameless/ derive ID?...
-#     -> what to save and what to filter?
+#TODO: rewrite using ffmaplib
 
 require 'json'
 require 'sinatra'

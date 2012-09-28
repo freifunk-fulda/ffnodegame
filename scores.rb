@@ -4,7 +4,7 @@
 #Licensed under The GPLv3
 
 require 'json'
-require 'net/http'
+require 'open-uri'
 
 require './settings'
 
@@ -58,7 +58,7 @@ class Scores
     #load node data
     jsonstr = nil
     begin
-      jsonstr = Net::HTTP.get(URI(JSONSRC))
+      jsonstr = open(JSONSRC,'r:UTF-8').read
     rescue
       return false #failed!
     end
@@ -77,10 +77,7 @@ class Scores
 
   #load current score file or fall back to empty array
   def self.read_scores
-    scores = nil
-    file = File.open @@scorepath,'r:UTF-8'  #because passenger sucks
-    scores = JSON.parse file.read
-    return scores
+    return JSON.parse open(@@scorepath,'r:UTF-8').read
   rescue
     return []
   end
