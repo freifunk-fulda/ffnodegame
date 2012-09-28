@@ -33,12 +33,5 @@ BLACKLIST=['burgtor','holstentor','muehlentor']
 
 #----
 
-#start updater thread from sinatra (does not work when integrated with passenger)
-STARTUPDATER=false
-#update interval in minutes when using builtin update thread
-INTERVAL=60
-
-#----
-
 #enable logging
 LOG=true

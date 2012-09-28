@@ -11,42 +11,12 @@ require 'sinatra'
 
 require './settings'
 require './scores'
-require './updater'
 
 #some constants
 TITLE = "Freifunk Lübeck Node Highscores"
 GRAPHLINK='http://burgtor.ffhl/mesh/nodes.html'
 
 log "---- APPLICATION STARTING ----"
-
-if STARTUPDATER
-
-Updater.start
-
-#admin/debug routes
-get '/start' do
-  if params['pw'] == PWD
-    val = Updater.start
-    val ? 'Updater started!' : 'Already running!'
-  else
-    'Wrong password!'
-  end
-end
-
-get '/stop' do
-  if params['pw'] == PWD
-    Updater.stop
-    'Requesting thread to die!'
-  else
-    'Wrong password!'
-  end
-end
-
-get '/status' do
-  "Updater thread is#{Updater.running? ? ' ' : ' NOT '}running!"
-end
-
-end #updater control routes
 
 get '/update' do
   if params['pw'] == PWD
@@ -59,9 +29,11 @@ end
 
 get '/reset' do
   if params['pw'] == PWD
-    File.delete 'public/scores.json'
-    Scores.update
-    'Scores reset!'
+    if Scores.reset && Scores.update
+      'Scores reset!'
+    else
+      'Reset failed!'
+    end
   else
     'Wrong password!'
   end

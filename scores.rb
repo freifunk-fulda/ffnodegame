@@ -51,6 +51,13 @@ class Scores
     return scores
   end
 
+  def self.reset
+    File.delete @@scorepath
+    return true
+  rescue
+    return false
+  end
+
   #run one update cycle and generate/update the score file
   def self.update
     scores = read_scores
