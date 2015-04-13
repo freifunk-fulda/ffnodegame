@@ -14,8 +14,8 @@ require './settings'
 require './scores'
 
 #some constants
-TITLE = "Freifunk Lübeck Node Highscores"
-GRAPHLINK='http://burgtor.ffhl/mesh/nodes.html'
+TITLE = "Freifunk Fulda Node Highscores"
+GRAPHLINK='http://map.freifunk-fulda.de/nodes.html'
 
 log "---- APPLICATION STARTING ----"
 
