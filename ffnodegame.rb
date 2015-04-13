@@ -6,6 +6,7 @@
 
 #TODO: rewrite using ffmaplib
 
+require 'rubygems'
 require 'json'
 require 'sinatra'
 
